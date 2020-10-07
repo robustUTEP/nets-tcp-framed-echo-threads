@@ -1,6 +1,6 @@
 import re
 
-class FramedSock:               # a facade
+class EncapFramedSock:               # a facade
   def __init__(self, sockAddr):
     self.sock, self.addr = sockAddr
     self.rbuf = b""         # receive buffer

@@ -6,7 +6,7 @@ import socket, sys, re
 sys.path.append("../lib")       # for params
 import params
 
-from framedSock import FramedSock
+from encapFramedSock import EncapFramedSock
 
 
 switchesVarDefaults = (
@@ -44,7 +44,7 @@ if sock is None:
 
 sock.connect(addrPort)
 
-fsock = FramedSock((sock, addrPort))
+fsock = EncapFramedSock((sock, addrPort))
 
 for i in range(2):
     print("sending hello world")

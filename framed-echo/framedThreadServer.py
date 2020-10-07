@@ -25,13 +25,13 @@ lsock.listen(5)
 print("listening on:", bindAddr)
 
 from threading import Thread;
-from framedSock import FramedSock
+from encapFramedSock import EncapFramedSock
 
 class Server(Thread):
     def __init__(self, sockAddr):
         Thread.__init__(self)
         self.sock, self.addr = sockAddr
-        self.fsock = FramedSock(self.sock)
+        self.fsock = EncapFramedSock(sockAddr)
     def run(self):
         print("new thread handling connection from", self.addr)
         while True:
