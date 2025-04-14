@@ -37,23 +37,33 @@ addrFamily = socket.AF_INET
 socktype = socket.SOCK_STREAM
 addrPort = (serverHost, serverPort)
 
-print("client started")
-sock = socket.socket(addrFamily, socktype)
+class Client(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+    def run(self):
+        print("client started")
+        sock = socket.socket(addrFamily, socktype)
 
-if sock is None:
-    print('could not open socket')
-    sys.exit(1)
-sock.connect(addrPort)
-name = sock.getsockname()
-print(f"client {name} connected")
-fsock = EncapFramedSock((sock, name))
-fsock.send( b"hello world", debug)
-print(f"client {name} received:", fsock.receive(debug))
+        if sock is None:
+            print('could not open socket')
+            sys.exit(1)
+        sock.connect(addrPort)
+        name = sock.getsockname()
+        print(f"client {name} connected")
+        fsock = EncapFramedSock((sock, name))
+        fsock.send( b"hello world", debug)
+        print(f"client {name} received:", fsock.receive(debug))
 
-fsock.send( b"hello world", debug)
-fsock.shutdown()
-print(f"client {name} received:", fsock.receive(debug))
+        fsock.send( b"hello world", debug)
+        fsock.shutdown()
+        print(f"client {name} received:", fsock.receive(debug))
 
-fsock.close()
-print(f"client {name} done")
+        fsock.close()
+        print(f"client {name} done")
 
+clients = [ Client() for _ in range(10) ]
+for c in clients:
+    c.start()
+
+for c in clients:
+    c.join()

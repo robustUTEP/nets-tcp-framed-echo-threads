@@ -2,7 +2,7 @@
 
 import sys
 sys.path.append("../lib")       # for params
-import re, socket, params
+import re, socket, params, os
 
 switchesVarDefaults = (
     (('-l', '--listenPort') ,'listenPort', 50001),
@@ -15,6 +15,9 @@ paramMap = params.parseParams(switchesVarDefaults)
 
 debug, listenPort = paramMap['debug'], paramMap['listenPort']
 
+from encapFramedSock import EncapFramedSock
+
+
 if paramMap['usage']:
     params.usage()
 
@@ -24,17 +27,23 @@ lsock.bind(bindAddr)
 lsock.listen(5)
 print("listening on:", bindAddr)
 
-sock, addr = lsock.accept()
-
-print("connection rec'd from", addr)
-
-
-from framedSock import framedSend, framedReceive
 
 while True:
-    payload = framedReceive(sock, debug)
-    if debug: print("rec'd: ", payload)
-    if not payload:
-        break
-    payload += b"!"             # make emphatic!
-    framedSend(sock, payload, debug)
+    sockAddr = lsock.accept()
+    sock, name = sockAddr
+    fsock = EncapFramedSock((sock, name))
+    while True:
+        payload = fsock.receive(debug)
+        if debug: print("rec'd: ", payload)
+        if not payload:     # done
+            if debug: print(f"client at {name} done")
+            fsock.close()
+            break
+        payload += b"!"             # make emphatic!
+        fsock.send(payload, debug)
+
+
+
+
+
+

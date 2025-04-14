@@ -15,6 +15,28 @@ paramMap = params.parseParams(switchesVarDefaults)
 
 debug, listenPort = paramMap['debug'], paramMap['listenPort']
 
+from threading import Thread;
+from encapFramedSock import EncapFramedSock
+
+class Server(Thread):
+    def __init__(self, sockName):
+        Thread.__init__(self)
+        self.sock, self.name = sockName
+        self.fsock = EncapFramedSock((self.sock, self.name))
+    def run(self):
+        print("new thread handling connection from", self.name)
+        while True:
+            payload = self.fsock.receive(debug)
+            if debug: print("rec'd: ", payload)
+            if not payload:     # done
+                if debug: print(f"thread connected to {self.name} done")
+                self.fsock.close()
+                return          # exit
+            payload += b"!"             # make emphatic!
+            self.fsock.send(payload, debug)
+
+
+
 if paramMap['usage']:
     params.usage()
 
@@ -24,25 +46,7 @@ lsock.bind(bindAddr)
 lsock.listen(5)
 print("listening on:", bindAddr)
 
-from threading import Thread;
-from encapFramedSock import EncapFramedSock
 
-class Server(Thread):
-    def __init__(self, sockAddr):
-        Thread.__init__(self)
-        self.sock, self.addr = sockAddr
-        self.fsock = EncapFramedSock(sockAddr)
-    def run(self):
-        print("new thread handling connection from", self.addr)
-        while True:
-            payload = self.fsock.receive(debug)
-            if debug: print("rec'd: ", payload)
-            if not payload:     # done
-                if debug: print(f"thread connected to {addr} done")
-                self.fsock.close()
-                return          # exit
-            payload += b"!"             # make emphatic!
-            self.fsock.send(payload, debug)
         
 
 while True:
